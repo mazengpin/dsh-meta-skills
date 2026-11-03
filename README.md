@@ -8,17 +8,15 @@ One fused surface for the **skills / tools evolution family**: one route prefix 
 
 Built under decision **`D-0352`** — *fuse behind ONE surface, prove capability parity, keep the members loaded, and never publish a number the fused surface cannot derive.*
 
-## Install
+## Adopting it inside DSH - the published release only
 
-**A consumer installs the published pre-release only.** This `0.9.0` tree is a source preview and is NOT an install path: what a consumer gets is the published tarball on the `next` dist-tag, and that tarball is the only install spec this package has.
-
-```
-pnpm add dsh-meta-skills@next
-```
-
-Then add `dsh-meta-skills` to `dsh.profile.bundles`. A bundles change hot-reloads; nothing else does, so a profile that has never listed this package needs a restart. The bundle patch `cordis.patch.yml` inserts exactly one loader row, `meta-skills`, and the row name equals the package name so the loader resolves the package's `.` export (`lib/index.js`).
-
-Members are NOT bundled by this package. Install and enable the members you want; each keeps its own row in the profile's bundle list. This package never mounts, replaces or unmounts them.
+A consumer adopts the PUBLISHED RELEASE and does not clone, build or link this repository; this `0.9.0` tree is a source preview and is NOT an install path, and the published tarball on the `next` dist-tag is the only install spec this package has.
+What it provides: one fused surface for the skills and tools evolution family - one route prefix `/meta-skills`, one sidebar entry and a capability ledger graded at request time - composing five member plugins while every member stays installed, registered and loaded.
+It drives an engine it does not own: each family namespace forwards to the member's own prefix and nothing is re-implemented, so no second policy store is created.
+What a deployment needs: the members installed and enabled, because members are NOT bundled by this package and each keeps its own row in the profile's bundle list; this package never mounts, replaces or unmounts them.
+How a profile enables a package: add `dsh-meta-skills` to that profile's `dsh.profile.bundles`; a bundles change hot-reloads, so a profile that has never listed this package needs a restart.
+The bundle patch `cordis.patch.yml` inserts exactly one loader row, `meta-skills`, and the row name equals the package name so the loader resolves the package's `.` export (`lib/index.js`).
+A source preview is READABLE but NOT installable: it can be read, built and linked for development, and no command in it installs the package.
 
 ## Developing it
 
