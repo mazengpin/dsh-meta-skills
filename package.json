@@ -1,0 +1,72 @@
+{
+  "name": "dsh-meta-skills",
+  "version": "0.9.0",
+  "type": "module",
+  "description": "The fused surface for the skills / tools evolution family (D-0352): one route prefix (/meta-skills) and one sidebar entry composing dsh-skill-evolution, dsh-tools-skills-evolve, dsh-recall-console, dsh-evolution-console and dsh-skill-studio, with a capability ledger that reports every declared member capability as PRESENT or UNMEASURED-with-reason and never as a zero.",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "cordis",
+    "plugin",
+    "skills",
+    "tools",
+    "evolution",
+    "fusion"
+  ],
+  "license": "MIT",
+  "author": "VanadisGithub",
+  "engines": {
+    "node": ">=22",
+    "dsh": ">=0.2.0-rc.2"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "lib/client.js.map",
+    "src",
+    "cordis.patch.yml",
+    "LICENSE",
+    "README.md",
+    "ROADMAP.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-layout"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "verify": "node verify/parity.mjs",
+    "check": "tsc --noEmit && tsdown && node verify/parity.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "~18.3.1",
+    "lightningcss": "^1.32.0",
+    "react": "^18.2.0",
+    "tsdown": "^0.22.2",
+    "typescript": "^5.6.0"
+  },
+  "publishConfig": {
+    "tag": "next"
+  },
+  "status": "pre-release"
+}
