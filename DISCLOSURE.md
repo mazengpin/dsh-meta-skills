@@ -38,7 +38,7 @@ The rule it is built to satisfy is stated in its own README: **it writes no file
 **This package reads no skill root and writes no skill root — 0 of 0 paths.** Measured: **0 of 11** source files under `src/` (`src/host/` 5, `src/shared/` 1, `src/client/` 5) import `node:fs`; the only Node builtin imported anywhere is `node:http`.
 It reads the **network**, not the disk: the member HTTP responses, forwarded byte for byte.
 **The skill root belongs to the members, so the ordering question has this answer: there is no fallback chain here to order.** `dsh-skill-studio` names exactly ONE scanned root as a named export, `ACTIVE_SKILL_ROOT = <workspace>/.agents/skills` (`plugins-src/dsh-skill-studio/src/host/config.ts:39`).
-Its siblings in that same file: `PROMOTION_ROOT` is the same directory, `STAGING_ROOT = <workspace>/state/skill-staging`, `LEDGER_PATH = <workspace>/research/skill-studio-ledger.jsonl`, and `<workspace>` is `C:/Users/0000/Projects/deepseek-root/profiles-tree/personal-dev/dsh-meta-evolve_INIT_WORKSPACE` (`config.ts:32`).
+Its siblings in that same file: `PROMOTION_ROOT` is the same directory, `STAGING_ROOT = <workspace>/state/skill-staging`, `LEDGER_PATH = <workspace>/research/skill-studio-ledger.jsonl`, and `<workspace>` is `<home>/Projects/deepseek-root/profiles-tree/personal-dev/dsh-meta-evolve_INIT_WORKSPACE` (`config.ts:32`).
 The derived candidates the harness would otherwise try (`<workspace>/.dsh/skills`, then `<workspace>/.agents/skills`) are **not** scanned by the studio; `config.ts:12-16` records why — a derived root is selection that does not select, the defect that member exists to prevent.
 
 ## 5. Network
