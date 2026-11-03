@@ -10,6 +10,13 @@ It does this with one route prefix (`/meta-skills`) and one sidebar row, composi
 The five members are `dsh-skill-evolution`, `dsh-tools-skills-evolve`, `dsh-recall-console`, `dsh-evolution-console` and `dsh-skill-studio`.
 Nothing is re-implemented: each family namespace forwards to the matching member prefix on the request `Host` authority and returns the member bytes untouched.
 
+## 1b. Why a fused skill surface belongs in the ecosystem
+
+Skills and tools are the part of a plugin ecosystem that grows fastest and is least discoverable: five member surfaces each grow their own rows, and no reader of any one of them can say what the set contains.
+One surface that drives selection, recall and promotion makes the set auditable, because a row that cannot be driven is a row that is not there — a check five separate surfaces cannot make of each other.
+Because this package forwards rather than re-implements, that audit reads the members themselves, so it cannot disagree with what is installed.
+The cost is that the surface is only as honest as its absence path, which is why the engine harness mutants are part of the disclosure and not an appendix to it.
+
 ## 2. What it does today
 
 **The measured harness count below is this package's own, run once for this disclosure; it is NOT inherited from a sibling package.**
@@ -18,6 +25,7 @@ The denominator is the run's own arithmetic: the ledger closes at **46 capabilit
 Route capabilities driven through the fused surface: **40 of 40**. With the loopback fixture up, health answers **5 of 5** members; with it down, **0 of 5** answer and all five report `no-reading` with a reason rather than a zero.
 **The two failures are named.** (i) `population: gate routes` — the ledger declares **5** gate routes while `dsh-tools-skills-evolve` dispatches **7** (`state`, `knobs`, `registry`, `metaControl`, `decide`, `toolControl`, `toolView`). (ii) `citations` — **5 unresolved** cited lines, at `dsh-tools-skills-evolve/src/host/routes.ts:218,223,234,239,251`, each of which no longer contains the token the ledger cites.
 Both are member drift caught by this package's own census, and they are reported here rather than repaired in a disclosure pass.
+**CORRECTED IN PLACE 2026-11-03 — the count above is one census behind and its two failures no longer reproduce.** Re-run for this edit: `node verify/parity.mjs` exits `0` at census `2026-11-03T22:42:09.168Z` with **64 of 64 checks passed, 0 failed**, **46 of 46 route capabilities driven** and the ledger at **51 of 52 capability kinds** with the same single in-process gap; the gate-route population check and all cited lines now agree with the members. The numbers are maintained in [`research.md`](research.md) section 2 rather than in this paragraph, because a count copied into a disclosure goes stale exactly as the ledger did.
 
 **The one structural fact: this package registers exactly ONE `sidebar.panellist` nav row for the fused family.**
 The row id is `dsh-meta-skills:skills`, equal to the keyed `main` panel key, at order `6.45`; no `priority` is registered anywhere, so the entry can only add a row and never take another plugin seat.
