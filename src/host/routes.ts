@@ -41,7 +41,7 @@ import {
   type HealthResponse,
   type NotFoundResponse,
 } from '../shared/protocol.ts'
-import { FAMILIES, ROUTE_METHODS, ROUTE_PATHS } from '../shared/protocol.ts'
+import { CAPABILITIES, FAMILIES, ROUTE_METHODS, ROUTE_PATHS } from '../shared/protocol.ts'
 import type { Family } from '../shared/protocol.ts'
 import { buildCapabilities, probeMembers } from './capabilities.ts'
 import { forward, readBody, resolveOrigin, UpstreamUnreachable } from './proxy.ts'
@@ -165,8 +165,12 @@ export function createRouteHandler(config: MetaSkillsConfig): (req: IncomingMess
       // one declared verb per path, so the loop's verb enforcement applies unchanged.
       for (const family of ['tools', 'recall', 'pipeline', 'studio'] as const) {
         const fusedBase = FAMILIES[family].fusedBase
-        if (declared === undefined || !declared[1].startsWith(`${fusedBase}/`)) continue
-        const tail = declared[1].slice(fusedBase.length + 1)
+        // A declared fused path may BE the family base rather than sit under it:
+        // `toolView` is served at `/api/tools`, and a prefix-only test sends it past
+        // every branch to a 404 that names the path as unknown even though the
+        // ledger declares it. So equality is accepted, and the tail is empty.
+        if (declared === undefined || (declared[1] !== fusedBase && !declared[1].startsWith(`${fusedBase}/`))) continue
+        const tail = declared[1] === fusedBase ? '' : declared[1].slice(fusedBase.length + 1)
         // The declared verb is ENFORCED. The member is never asked a question its
         // own guard would refuse, and the 405 here is this plugin's own answer
         // rather than the member's, so a wrong method reads as a wrong method.
@@ -176,7 +180,14 @@ export function createRouteHandler(config: MetaSkillsConfig): (req: IncomingMess
           return
         }
         const origin = baseFor(config, family, req)
-        const target = `${origin}${FAMILIES[family].upstreamBase}/${tail}${url.search}`
+        // The member path comes from the LEDGER, not from the fused tail: the two
+        // differ whenever a member names a route differently from its fused entry
+        // (`/api/tools/control` is `/tools-skills-evolve/api/tools/control`, and the
+        // tail alone would build `/api/control` — a route the member does not serve,
+        // which the parity harness caught as a marker mismatch, not as a 404).
+        const ledgerRow = CAPABILITIES.find((row: (typeof CAPABILITIES)[number]) => row.kind === 'route' && row.fusedPath === declared[1])
+        const memberPath = ledgerRow?.upstreamPath ?? `${FAMILIES[family].upstreamBase}/${tail}`
+        const target = `${origin}${memberPath}${url.search}`
         const body = method === 'GET' ? Buffer.alloc(0) : await readBody(req)
         const answer = await forward(req, target, body, config.timeoutMs ?? 15000)
         writeForwarded(res, answer.status, answer.body, answer.contentType)
