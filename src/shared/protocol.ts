@@ -128,6 +128,15 @@ export const ROUTE_PATHS = {
   'studioRounds': '/api/studio/rounds',
   'studioMembers': '/api/studio/members',
   'studioGrant': '/api/studio/grant',
+  // ---- THE ENGINE DRIVER (the sixth family). These four routes do NOT forward:
+  // they call the engine's own exported entry points in process, so a fused path
+  // here is servable even when no member is mounted — and the answer carries which
+  // engine FILE served it. The citations below resolve in the engine clone, and
+  // `verify/parity.mjs` opens each one and requires the named export on that line.
+  'engine/select': '/api/engine/select',
+  'engine/recall': '/api/engine/recall',
+  'engine/promote': '/api/engine/promote',
+  'engine/store-census': '/api/engine/store-census',
 } as const
 
 /**
@@ -186,6 +195,10 @@ export const ROUTE_METHODS = {
   'studioRounds': 'GET',
   'studioMembers': 'GET',
   'studioGrant': 'POST',
+  'engine/select': 'POST',
+  'engine/recall': 'POST',
+  'engine/promote': 'POST',
+  'engine/store-census': 'GET',
 } as const
 
 /** One declared route's dispatch name. */
@@ -253,6 +266,20 @@ export const FAMILIES = {
     member: 'dsh-skill-studio',
     fusedBase: '/api/studio',
     upstreamBase: '/skill-studio/api',
+    wire: 'json',
+  },
+  // THE SIXTH FAMILY IS NOT AN HTTP MEMBER AND THAT IS THE POINT: its four routes are
+  // served IN PROCESS by `src/host/engine.ts`, which imports the engine's own modules
+  // out of the `dsh-skill-evolution` clone and calls their exported entry points.
+  // `upstreamBase: ''` is the honest encoding of 'there is no upstream prefix to
+  // forward to' — the empty string cannot be mistaken for a base, and the dispatcher
+  // never builds a URL from this family. The `member` is the clone the engine modules
+  // live in, which is also what every citation below resolves against.
+  engine: {
+    family: 'engine',
+    member: 'dsh-skill-evolution',
+    fusedBase: '/api/engine',
+    upstreamBase: '',
     wire: 'json',
   },
 } as const
@@ -625,6 +652,34 @@ export const CAPABILITIES: readonly Capability[] = [
     fusedPath: null, upstreamPath: null,
     citation: 'src/client/index.ts:94', citedToken: "'dsh-skill-studio:studio'", wire: null, unmeasuredReason: null,
     what: "the studio's own sidebar.panellist row (id dsh-skill-studio:studio, order 6.6 at src/client/index.ts:99) plus its keyed main panel, replaced on the fused surface by the one meta-skills entry whose Studio tab reaches the seven routes above",
+  },
+  // ---------------------------------------------------------------- engine (the in-process driver)
+  // These four rows are the ones this package DRIVES: each cites the engine's own
+  // export, on the engine's own line, in the engine's own clone. A citation that
+  // stops resolving is a driver that would silently stop reaching its engine.
+  {
+    id: 'engine.select', family: 'engine', member: 'dsh-skill-evolution', kind: 'route', verb: 'POST',
+    fusedPath: '/api/engine/select', upstreamPath: null,
+    citation: 'skill-select.mjs:376', citedToken: 'decideSkillSelection', wire: 'json', unmeasuredReason: null,
+    what: 'drives decideSkillSelection: the skill selector, over a prompt and a skill snapshot, answering with the engine\'s own status/selected record',
+  },
+  {
+    id: 'engine.recall', family: 'engine', member: 'dsh-skill-evolution', kind: 'route', verb: 'POST',
+    fusedPath: '/api/engine/recall', upstreamPath: null,
+    citation: 'skill-recall.mjs:434', citedToken: 'retrieveTrajectories', wire: 'json', unmeasuredReason: null,
+    what: 'drives retrieveTrajectories: trajectory retrieval over session-store roots and a task, answering with the engine\'s own ranked corpus and instrument flags',
+  },
+  {
+    id: 'engine.promote', family: 'engine', member: 'dsh-skill-evolution', kind: 'route', verb: 'POST',
+    fusedPath: '/api/engine/promote', upstreamPath: null,
+    citation: 'skill-promote.mjs:336', citedToken: 'decidePromotion', wire: 'json', unmeasuredReason: null,
+    what: 'drives decidePromotion: the promotion gate over one candidate, answering with the engine\'s own outcome, reading, threshold and permitted flag',
+  },
+  {
+    id: 'engine.store', family: 'engine', member: 'dsh-skill-evolution', kind: 'route', verb: 'GET',
+    fusedPath: '/api/engine/store-census', upstreamPath: null,
+    citation: 'skill-store.mjs:126', citedToken: 'skillRootTable', wire: 'json', unmeasuredReason: null,
+    what: 'drives skillRootTable plus inspectSkillFile: the skill store\'s own root table, then one frontmatter reading per SKILL.md found, with a non-existent root reported as null and never as 0',
   },
 ] as const
 

@@ -77,3 +77,23 @@ export async function postSkill(endpoint: string, args: Record<string, unknown> 
 export async function getFamily(family: 'tools' | 'recall' | 'pipeline' | 'studio', tail: string): Promise<Reading<unknown>> {
   return await read<unknown>(`${ROUTE_PREFIX}/api/${family}/${tail}`, { method: 'GET' })
 }
+
+/**
+ * THE ENGINE ROUTES ARE DRIVEN, NOT FORWARDED, and the page calls them the same
+ * way it calls everything else: through the fused prefix. `/api/engine/...` is
+ * served in process by the host driver, so these two functions are the only
+ * client path to a real engine call — a surface that could not address them would
+ * be the describe-don't-drive defect with a nicer panel.
+ */
+export async function getEngineStoreCensus(): Promise<Reading<unknown>> {
+  return await read<unknown>(`${ROUTE_PREFIX}/api/engine/store-census`, { method: 'GET' })
+}
+
+/** Drive one of the three engine operations that take a body. */
+export async function postEngine(operation: 'select' | 'recall' | 'promote', body: Record<string, unknown> = {}): Promise<Reading<unknown>> {
+  return await read<unknown>(`${ROUTE_PREFIX}/api/engine/${operation}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}

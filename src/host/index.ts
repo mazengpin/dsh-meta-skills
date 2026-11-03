@@ -40,6 +40,24 @@ import type { HostContext, MetaSkillsConfig } from './types.ts'
  */
 export { CAPABILITIES, CENSUS_ADOPTION, CONSIDERED_NOT_FUSED, EXCLUDED_MEMBERS, FAMILIES, FUSED_BEYOND_CENSUS, ROUTE_METHODS, ROUTE_PATHS, ROUTE_PREFIX, CAPABILITIES_PATH, HEALTH_PATH } from '../shared/protocol.ts'
 
+/**
+ * The ENGINE DRIVER is re-exported for the same reason the ledger is: the harness
+ * prices the artifact a profile loads. `verify/engine.mjs` calls these driver
+ * functions directly, so a build that exported nothing would fail there rather
+ * than pass over a description of a driver that was never compiled.
+ */
+export {
+  ENGINE_MEMBER,
+  ENGINE_OPERATIONS,
+  engineRoot,
+  enginePromote,
+  engineRecall,
+  engineSelect,
+  engineStoreCensus,
+  runEngineRoute,
+} from './engine.ts'
+export type { EngineFile, EngineHttpAnswer, EngineOperation, EngineOptions, EngineRefusal, EngineResult, EngineRoute, RefusalKind } from './engine.ts'
+
 /** Loader row name; the bundle patch's `insert` mounts this same name. */
 export const name = 'dsh-meta-skills'
 
@@ -78,4 +96,5 @@ const FAMILIES_QUOTED = {
   recall: '/recall-console/api',
   pipeline: '/evolution/api',
   studio: '/skill-studio/api',
+  engine: '(in process — no upstream prefix, the driver calls the engine modules directly)',
 } as const

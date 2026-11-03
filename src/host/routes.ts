@@ -44,6 +44,7 @@ import {
 import { CAPABILITIES, FAMILIES, ROUTE_METHODS, ROUTE_PATHS } from '../shared/protocol.ts'
 import type { Family } from '../shared/protocol.ts'
 import { buildCapabilities, probeMembers } from './capabilities.ts'
+import { runEngineRoute, type EngineRoute } from './engine.ts'
 import { forward, readBody, resolveOrigin, UpstreamUnreachable } from './proxy.ts'
 import type { MetaSkillsConfig } from './types.ts'
 
@@ -135,6 +136,36 @@ export function createRouteHandler(config: MetaSkillsConfig): (req: IncomingMess
         return
       }
 
+      // ------------------------------------------------------------ engine (IN PROCESS, not forwarded)
+      // THESE FOUR ROUTES ARE DRIVEN, NOT FORWARDED. The handler calls the engine's own
+      // exported entry points through `src/host/engine.ts`, so the fused surface answers
+      // from the engine itself rather than describing it. The verb is enforced from
+      // ROUTE_METHODS exactly as for the forwarding families, and the driver's refusal
+      // kinds map to their own statuses: a missing engine reads as 503 WITH A REASON,
+      // never as a 200 with a zero in it.
+      if (declared !== undefined && declared[1].startsWith(`${FAMILIES.engine.fusedBase}/`)) {
+        const expected = ROUTE_METHODS[declared[0] as keyof typeof ROUTE_METHODS]
+        if (method !== expected) {
+          writeJson(res, 405, { ok: false, fused: 'dsh-meta-skills', error: 'method not allowed', route: `${ROUTE_PREFIX}${declared[1]}`, received: method, declared: expected })
+          return
+        }
+        let input: unknown = {}
+        if (method === 'POST') {
+          const raw = await readBody(req)
+          const text = raw.toString('utf8').trim()
+          if (text !== '') {
+            try {
+              input = JSON.parse(text)
+            } catch {
+              writeJson(res, 400, { ok: false, fused: 'dsh-meta-skills', error: 'body is not JSON', route: `${ROUTE_PREFIX}${declared[1]}` })
+              return
+            }
+          }
+        }
+        const answer = await runEngineRoute(declared[0] as EngineRoute, input)
+        writeJson(res, answer.status, answer.body)
+        return
+      }
       if (declared !== undefined && declared[1].startsWith(`${FAMILIES.skills.fusedBase}/`)) {
         // the tail comes from the DECLARED PATH, not from the key: a member's
         // dispatch name and its path segment are not always the same string
