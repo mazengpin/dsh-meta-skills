@@ -20,6 +20,26 @@ Then add `dsh-meta-skills` to `dsh.profile.bundles`. A bundles change hot-reload
 
 Members are NOT bundled by this package. Install and enable the members you want; each keeps its own row in the profile's bundle list. This package never mounts, replaces or unmounts them.
 
+## Developing it
+
+**The steps below are for DEVELOPING this package. They are not an install path**, and a profile that consumes a linked tree is consuming your build rather than a release.
+
+Clone the repository into `plugins-src/dsh-meta-skills` (the clone URL is set by the release owner alongside the published tarball, and is deliberately not printed here), then:
+
+```
+cd plugins-src/dsh-meta-skills
+pnpm install
+pnpm run check          # typecheck + build + parity harness
+```
+
+Link a developing profile at it with a **relative** `link:`, never an absolute path — in that profile's `package.json`:
+
+```
+"dependencies": { "dsh-meta-skills": "link:../../plugins-src/dsh-meta-skills" }
+```
+
+A link that points at a working tree is how a member is developed against, and it is the reason this package's own harness reads the BUILT `lib/index.js`: what a linked profile loads is what the harness grades.
+
 ## What it composes
 
 | member | what it is | prefix it keeps |
